@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convite do Paulo Arthur - Tema Pokémon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Container Inicial da Pokébola */
+        #pokeball-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.5s ease;
+        }
+
+        #pokeball-container p {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            color: #333;
+            margin-top: 20px;
+            text-align: center;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Desenho da Pokébola */
+        .pokeball {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(to bottom, #ee1515 50%, #ffffff 50%);
+            border-radius: 50%;
+            border: 8px solid #222224;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .pokeball:hover {
+            transform: scale(1.05);
+        }
+
+        .pokeball::before {
+            content: '';
+            position: absolute;
+            top: calc(50% - 4px);
+            width: 100%;
+            height: 8px;
+            background: #222224;
+        }
+
+        .pokeball-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: #ffffff;
+            border: 8px solid #222224;
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 4px #ffffff, inset 0 0 0 6px #222224;
+        }
+
+        /* Cartão do Convite */
+        #convite-card {
+            display: none;
+            background: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border: 4px solid #ffcb05;
+            animation: slideUp 0.6s ease forwards;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        #convite-card h1 {
+            font-family: 'Press Start 2P', cursive;
+            color: #2a75bb;
+            font-size: 16px;
+            line-height: 1.5;
+            text-shadow: 2px 2px #ffcb05;
+            margin-bottom: 20px;
+        }
+
+        /* Estilo do Vídeo */
+        .video-container {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid #2a75bb;
+            margin-bottom: 20px;
+            background: #000;
+        }
+
+        .video-container video {
+            width: 100%;
+            display: block;
+        }
+
+        #convite-card p {
+            font-size: 16px;
+            color: #444;
+            margin: 10px 0;
+        }
+
+        .info-box {
+            background: #f8f8f8;
+            border-left: 5px solid #ee1515;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+            border-radius: 4px;
+        }
+        
+        .info-box p {
+            font-size: 14px;
+            margin: 8px 0;
+        }
+
+        .link-maps {
+            display: inline-block;
+            margin-top: 10px;
+            color: #d93025;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .link-maps:hover {
+            text-decoration: underline;
+        }
+
+        /* Botão do WhatsApp (Confirmação) */
+        .btn-whatsapp {
+            display: inline-block;
+            background-color: #25D366;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-whatsapp:hover {
+            background-color: #128C7E;
+            transform: scale(1.05);
+        }
+
+        /* Botões de Adicionar à Agenda */
+        .calendar-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .btn-calendar {
+            display: inline-block;
+            background-color: #2a75bb;
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 13px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-calendar:hover {
+            background-color: #1a4d7a;
+            transform: scale(1.05);
+        }
+
+        /* Botão do Jogo */
+        .btn-jogo {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffcb05, #ee9b00);
+            color: #222;
+            text-decoration: none;
+            padding: 14px 26px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            animation: pulse 1.8s infinite;
+        }
+
+        .btn-jogo:hover {
+            transform: scale(1.05);
+        }
+
+        /* Rodapé de Contato */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            width: 100%;
+            background: #ddd;
+        }
+
+        footer a {
+            color: #2a75bb;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animações */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animação de "captura" da pokébola */
+        @keyframes captureShake {
+            0%, 100% { transform: rotate(0deg); }
+            10% { transform: rotate(-18deg); }
+            20% { transform: rotate(15deg); }
+            30% { transform: rotate(-14deg); }
+            40% { transform: rotate(10deg); }
+            50% { transform: rotate(-8deg); }
+            60% { transform: rotate(5deg); }
+            70% { transform: rotate(-3deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .pokeball.capturing {
+            animation: captureShake 1.4s ease-in-out;
+        }
+
+        #capture-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #ffffff 0%, #ffffff 45%, rgba(255,255,255,0) 72%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 999;
+            transition: opacity 0.35s ease;
+        }
+
+        #capture-flash.active {
+            opacity: 1;
+        }
+
+        /* Confete temático */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 500;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            top: -20px;
+            width: 10px;
+            height: 10px;
+            opacity: 0.9;
+            animation-name: confettiFall;
+            animation-timing-function: linear;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Cartão de Treinador */
+        .trainer-card {
+            background: linear-gradient(135deg, #2a75bb, #1a4d7a);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #fff;
+            border: 3px solid #ffcb05;
+        }
+
+        .trainer-card .trainer-label {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 9px;
+            color: #ffcb05;
+            letter-spacing: 1px;
+        }
+
+        .trainer-card .trainer-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .trainer-card .level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffcb05;
+            color: #222;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            animation: pulse 1.8s infinite;
+        }
+
+        /* Contagem regressiva */
+        .countdown-title {
+            font-size: 13px;
+            color: #2a75bb;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .countdown-box {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 0 20px;
+        }
+
+        .countdown-item {
+            background: #222224;
+            color: #ffcb05;
+            border-radius: 8px;
+            padding: 8px 6px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .countdown-item .num {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            display: block;
+        }
+
+        .countdown-item .label {
+            font-size: 8px;
+            display: block;
+            margin-top: 4px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Elemento de Áudio (música tema) -->
+    <audio id="musica-pokemon" src="tema-pokemon.mp3" preload="auto"></audio>
+
+    <!-- Efeito de flash da captura -->
+    <div id="capture-flash"></div>
+
+    <!-- Container de confete -->
+    <div id="confetti-container"></div>
+
+    <!-- Tela Inicial: Pokébola -->
+    <div id="pokeball-container" onclick="abrirConvite()">
+        <div class="pokeball">
+            <div class="pokeball-button"></div>
+        </div>
+        <p>Toque para capturar seu convite!</p>
+    </div>
+
+    <!-- Convite Aberto -->
+    <div id="convite-card">
+        <h1>Eu escolho VOCÊ!</h1>
+
+        <!-- Cartão de Treinador -->
+        <div class="trainer-card">
+            <span class="trainer-label">TREINADOR</span>
+            <div class="trainer-name">Paulo Arthur</div>
+            <div class="level-badge">⭐ Nível 10 alcançado!</div>
+        </div>
+
+        <!-- Player de Vídeo -->
+        <div class="video-container">
+            <video controls autoplay muted loop playsinline id="video-convite">
+                <source src="video-convite.mp4" type="video/mp4">
+                Seu navegador não suporta a tag de vídeo.
+            </video>
+        </div>
+
+        <p><span id="typewriter-text"></span></p>
+
+        <div class="info-box">
+            <p>📅 <strong>Data:</strong> Dia 22 de Agosto </p>
+            <p>⏰ <strong>Hora:</strong> Ás 19:30hrs</p>
+            <p>📍 <strong>Local:</strong> Rua 08, Número 3412<br>Loteamento Planalto Uruguai</p>
+            <a href="https://maps.app.goo.gl/AWunZEgA37DMd8vV8" class="link-maps" target="_blank">📍 Abrir no Google Maps</a>
+        </div>
+
+        <!-- Contagem regressiva -->
+        <div id="countdown-section">
+            <p class="countdown-title">⏳ Contagem regressiva para a festa:</p>
+            <div class="countdown-box">
+                <div class="countdown-item"><span class="num" id="cd-dias">0</span><span class="label">DIAS</span></div>
+                <div class="countdown-item"><span class="num" id="cd-horas">00</span><span class="label">HORAS</span></div>
+                <div class="countdown-item"><span class="num" id="cd-min">00</span><span class="label">MIN</span></div>
+                <div class="countdown-item"><span class="num" id="cd-seg">00</span><span class="label">SEG</span></div>
+            </div>
+        </div>
+
+        <p><em>Prepare suas Pokébolas e venha se divertir!</em></p>
+
+        <!-- Botão do WhatsApp para Confirmar Presença -->
+        <a href="https://wa.me/5586999566986?text=Olá!%20Gostaria%20de%20confirmar%20minha%20presença%20no%20aniversário%20do%20Mestre%20Pokémon%20Paulo%20Arthur!" class="btn-whatsapp" target="_blank">
+            Confirmar Presença
+        </a>
+
+        <br>
+
+        <!-- Botão do Jogo com Ranking -->
+        <a href="jogo.html" class="btn-jogo">
+            🎮 Jogar e disputar o Ranking!
+        </a>
+
+        <!-- Adicionar à Agenda -->
+        <div class="calendar-actions">
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Anivers%C3%A1rio%20do%20Paulo%20Arthur%20-%20Tema%20Pok%C3%A9mon&dates=20260822T193000/20260822T223000&ctz=America%2FFortaleza&details=Venha%20comemorar%20o%20anivers%C3%A1rio%20do%20Mestre%20Pok%C3%A9mon%20Paulo%20Arthur!&location=Rua%2008%2C%20N%C3%BAmero%203412%2C%20Loteamento%20Planalto%20Uruguai" class="btn-calendar" target="_blank">
+                📅 Google Agenda
+            </a>
+            <button class="btn-calendar" onclick="baixarICS()">
+                📅 Apple / Outlook
+            </button>
+        </div>
+    </div>
+
+    <!-- Rodapé Desenvolvedor -->
+    <footer>
+        Desenvolvido por Adriano Ferreira | 
+        <a href="https://linkedin.com/in/adrianoferreira-dev" target="_blank">LinkedIn</a> | 
+        <a href="https://wa.me/5586999830819" target="_blank">WhatsApp</a>
+    </footer>
+
+    <script>
+        function abrirConvite() {
+            const pokeballContainer = document.getElementById('pokeball-container');
+            const pokeballEl = pokeballContainer.querySelector('.pokeball');
+            const flash = document.getElementById('capture-flash');
+
+            // Impede novos cliques durante a animação
+            pokeballContainer.onclick = null;
+
+            // Fase 1: tremor de captura
+            pokeballEl.classList.add('capturing');
+
+            setTimeout(() => {
+                // Fase 2: flash de luz
+                flash.classList.add('active');
+
+                setTimeout(() => {
+                    pokeballContainer.style.display = 'none';
+
+                    // Toca a música do Pokémon
+                    const musica = document.getElementById('musica-pokemon');
+                    if(musica) {
+                        musica.volume = 0.5;
+                        musica.play().catch(e => console.log("Navegador bloqueou o áudio."));
+                    }
+
+                    // Ativa o som do vídeo se ele estiver mudo por conta do autoplay
+                    const video = document.getElementById('video-convite');
+                    if(video) {
+                        video.muted = false;
+                    }
+
+                    // Exibe o cartão do convite
+                    const convite = document.getElementById('convite-card');
+                    convite.style.display = 'block';
+
+                    iniciarTypewriter();
+                    criarConfete();
+                    iniciarContagem();
+
+                    setTimeout(() => {
+                        flash.classList.remove('active');
+                    }, 400);
+                }, 350);
+            }, 1400);
+        }
+
+        function iniciarTypewriter() {
+            const el = document.getElementById('typewriter-text');
+            const texto = 'O Mestre Pokémon Paulo Arthur está subindo de nível e convoca você para essa jornada!';
+            el.textContent = '';
+            let i = 0;
+            function digitar() {
+                if (i < texto.length) {
+                    el.textContent += texto.charAt(i);
+                    i++;
+                    setTimeout(digitar, 35);
+                }
+            }
+            digitar();
+        }
+
+        function criarConfete() {
+            const container = document.getElementById('confetti-container');
+            const cores = ['#ee1515', '#ffcb05', '#2a75bb', '#ffffff'];
+
+            for (let i = 0; i < 60; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + 'vw';
+                piece.style.background = cores[Math.floor(Math.random() * cores.length)];
+                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                const duracao = 2 + Math.random() * 2;
+                piece.style.animationDuration = duracao + 's';
+                piece.style.animationDelay = (Math.random() * 0.5) + 's';
+                container.appendChild(piece);
+                setTimeout(() => piece.remove(), (duracao + 0.5) * 1000);
+            }
+        }
+
+        function baixarICS() {
+            const ics = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'BEGIN:VEVENT',
+                'DTSTART;TZID=America/Fortaleza:20260822T193000',
+                'DTEND;TZID=America/Fortaleza:20260822T223000',
+                'SUMMARY:Aniversário do Paulo Arthur - Tema Pokémon',
+                'DESCRIPTION:Venha comemorar o aniversário do Mestre Pokémon Paulo Arthur!',
+                'LOCATION:Rua 08\\, Número 3412\\, Loteamento Planalto Uruguai',
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'aniversario-paulo-arthur.ics';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function iniciarContagem() {
+            const dataEvento = new Date('2026-08-22T19:30:00');
+
+            const intervalo = setInterval(atualizar, 1000);
+            atualizar();
+
+            function atualizar() {
+                const diff = dataEvento - new Date();
+
+                if (diff <= 0) {
+                    document.getElementById('countdown-section').innerHTML =
+                        '<p class="countdown-title">A jornada já começou! 🎉</p>';
+                    clearInterval(intervalo);
+                    return;
+                }
+
+                const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const horas = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutos = Math.floor((diff / (1000 * 60)) % 60);
+                const segundos = Math.floor((diff / 1000) % 60);
+
+                document.getElementById('cd-dias').textContent = dias;
+                document.getElementById('cd-horas').textContent = String(horas).padStart(2, '0');
+                document.getElementById('cd-min').textContent = String(minutos).padStart(2, '0');
+                document.getElementById('cd-seg').textContent = String(segundos).padStart(2, '0');
+            }
+        }
+    </script>
+</body>
+</html>
