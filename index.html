@@ -18,8 +18,11 @@
     <meta name="twitter:description" content="Venha comemorar o aniversário do Mestre Pokémon Paulo Arthur!">
     <meta name="twitter:image" content="https://convite-paulo-arthur.vercel.app/og-image.jpg">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap');
 
         body {
             margin: 0;
@@ -453,10 +456,10 @@
             <div class="level-badge">⭐ Nível 10 alcançado!</div>
         </div>
 
-        <!-- Player de Vídeo -->
+        <!-- Player de Vídeo (carregado só quando o convite abre, pra não pesar o carregamento inicial) -->
         <div class="video-container">
-            <video controls autoplay muted loop playsinline id="video-convite">
-                <source src="video-convite.mp4" type="video/mp4">
+            <video controls muted loop playsinline preload="none" id="video-convite">
+                <source data-src="video-convite.mp4" type="video/mp4">
                 Seu navegador não suporta a tag de vídeo.
             </video>
         </div>
@@ -539,10 +542,19 @@
                         musica.play().catch(e => console.log("Navegador bloqueou o áudio."));
                     }
 
-                    // Ativa o som do vídeo se ele estiver mudo por conta do autoplay
+                    // Só agora carrega e toca o vídeo (evita baixar o arquivo antes do convite abrir)
                     const video = document.getElementById('video-convite');
                     if(video) {
+                        const fonte = video.querySelector('source');
+                        if (fonte && !fonte.src) {
+                            fonte.src = fonte.dataset.src;
+                            video.load();
+                        }
                         video.muted = false;
+                        video.play().catch(() => {
+                            video.muted = true;
+                            video.play().catch(e => console.log("Navegador bloqueou o vídeo."));
+                        });
                     }
 
                     // Exibe o cartão do convite
