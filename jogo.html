@@ -90,6 +90,68 @@
             text-decoration: underline;
         }
 
+        .foto-label {
+            display: inline-block;
+            font-size: 13px;
+            color: #2a75bb;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-bottom: 10px;
+        }
+
+        #preview-foto {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 3px solid #2a75bb;
+            background: #eee;
+            margin: 0 auto 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        #preview-foto img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .confirmar-jogador p {
+            font-size: 14px;
+            color: #444;
+        }
+
+        .confirmar-jogador .btn {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #2a75bb;
+            border: 2px solid #2a75bb;
+        }
+
+        .avatar-ranking {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+            border: 2px solid #ffcb05;
+        }
+
+        .avatar-ranking.placeholder {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eee;
+            font-size: 14px;
+        }
+
         .hud {
             display: flex;
             justify-content: space-between;
@@ -244,7 +306,20 @@
             <p>Digite seu nome para entrar no ranking:</p>
             <input type="text" id="input-nome" maxlength="30" placeholder="Seu nome">
             <br>
-            <button class="btn" onclick="salvarNome()">Começar</button>
+
+            <div id="preview-foto"><img id="preview-foto-img" alt="Prévia da foto"></div>
+            <label class="foto-label" for="input-foto">📷 Adicionar foto (opcional)</label>
+            <input type="file" id="input-foto" accept="image/*" style="display:none;">
+            <br>
+
+            <button class="btn" onclick="verificarNome()">Começar</button>
+        </div>
+
+        <div id="tela-confirmar" class="confirmar-jogador" style="display:none;">
+            <p>Encontramos um jogador chamado <strong id="nome-encontrado"></strong> com <strong id="pontos-encontrado"></strong> pontos no ranking.</p>
+            <p><strong>É você?</strong></p>
+            <button class="btn" onclick="confirmarMesmoJogador()">Sim, sou eu</button>
+            <button class="btn btn-outline" onclick="confirmarNovoJogador()">Não sou eu, continuar cadastro</button>
         </div>
 
         <div id="tela-jogo" style="display:none;">
@@ -265,10 +340,10 @@
         <h1 style="margin-top:25px;">🏆 Ranking</h1>
         <table class="ranking">
             <thead>
-                <tr><th>#</th><th>Treinador</th><th>Pontos</th></tr>
+                <tr><th>#</th><th>Foto</th><th>Treinador</th><th>Pontos</th></tr>
             </thead>
             <tbody id="ranking-corpo">
-                <tr><td colspan="3">Carregando...</td></tr>
+                <tr><td colspan="4">Carregando...</td></tr>
             </tbody>
         </table>
 
@@ -277,6 +352,8 @@
 
     <script>
         const CHAVE_NOME = 'pa-jogador-nome';
+        const CHAVE_ID = 'pa-jogador-id';
+        const CHAVE_FOTO = 'pa-jogador-foto';
         const DURACAO_RODADA = 30;
         const TOTAL_IMAGENS_POKEMON = 29;
         const IMAGENS_POKEMON = Array.from(
@@ -293,27 +370,118 @@
         let intervaloSpawn = null;
         let rodadaAtiva = false;
 
+        let fotoEscolhida = null;
+        let nomeEmVerificacao = '';
+        let jogadorEncontrado = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             const nomeSalvo = localStorage.getItem(CHAVE_NOME);
             if (nomeSalvo) {
                 mostrarTelaJogo(nomeSalvo);
             }
+
+            const inputFoto = document.getElementById('input-foto');
+            inputFoto.addEventListener('change', async () => {
+                const arquivo = inputFoto.files[0];
+                if (!arquivo) return;
+                try {
+                    fotoEscolhida = await processarFoto(arquivo);
+                    const preview = document.getElementById('preview-foto');
+                    document.getElementById('preview-foto-img').src = fotoEscolhida;
+                    preview.style.display = 'block';
+                } catch (e) {
+                    alert('Não consegui processar essa foto. Tente outra.');
+                }
+            });
+
             carregarRanking();
         });
 
-        function salvarNome() {
+        function processarFoto(arquivo) {
+            return new Promise((resolve, reject) => {
+                const leitor = new FileReader();
+                leitor.onload = (evento) => {
+                    const imagem = new Image();
+                    imagem.onload = () => {
+                        const tamanho = 96;
+                        const canvas = document.createElement('canvas');
+                        canvas.width = tamanho;
+                        canvas.height = tamanho;
+                        const ctx = canvas.getContext('2d');
+
+                        const lado = Math.min(imagem.width, imagem.height);
+                        const origX = (imagem.width - lado) / 2;
+                        const origY = (imagem.height - lado) / 2;
+                        ctx.drawImage(imagem, origX, origY, lado, lado, 0, 0, tamanho, tamanho);
+
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    imagem.onerror = reject;
+                    imagem.src = evento.target.result;
+                };
+                leitor.onerror = reject;
+                leitor.readAsDataURL(arquivo);
+            });
+        }
+
+        async function verificarNome() {
             const valor = document.getElementById('input-nome').value.trim();
             if (!valor) {
                 alert('Digite um nome para continuar!');
                 return;
             }
             const nome = valor.slice(0, 30);
+            nomeEmVerificacao = nome;
+
+            try {
+                const resposta = await fetch('/api/ranking?verificar=' + encodeURIComponent(nome));
+                const encontrado = await resposta.json();
+
+                if (encontrado && encontrado.jogador_id) {
+                    jogadorEncontrado = encontrado;
+                    document.getElementById('nome-encontrado').textContent = encontrado.nome;
+                    document.getElementById('pontos-encontrado').textContent = encontrado.pontos;
+                    document.getElementById('tela-nome').style.display = 'none';
+                    document.getElementById('tela-confirmar').style.display = 'block';
+                    return;
+                }
+            } catch (e) {
+                // se a verificação falhar, segue como cadastro novo mesmo
+            }
+
+            registrarNovoJogador(nome);
+        }
+
+        function confirmarMesmoJogador() {
+            localStorage.setItem(CHAVE_ID, jogadorEncontrado.jogador_id);
+            localStorage.setItem(CHAVE_NOME, jogadorEncontrado.nome);
+            if (jogadorEncontrado.foto) {
+                localStorage.setItem(CHAVE_FOTO, jogadorEncontrado.foto);
+            }
+            document.getElementById('tela-confirmar').style.display = 'none';
+            mostrarTelaJogo(jogadorEncontrado.nome);
+        }
+
+        function confirmarNovoJogador() {
+            document.getElementById('tela-confirmar').style.display = 'none';
+            registrarNovoJogador(nomeEmVerificacao);
+        }
+
+        function registrarNovoJogador(nome) {
+            localStorage.setItem(CHAVE_ID, crypto.randomUUID());
             localStorage.setItem(CHAVE_NOME, nome);
+            if (fotoEscolhida) {
+                localStorage.setItem(CHAVE_FOTO, fotoEscolhida);
+            }
             mostrarTelaJogo(nome);
         }
 
         function trocarNome() {
             localStorage.removeItem(CHAVE_NOME);
+            localStorage.removeItem(CHAVE_ID);
+            localStorage.removeItem(CHAVE_FOTO);
+            fotoEscolhida = null;
+            document.getElementById('preview-foto').style.display = 'none';
             document.getElementById('tela-jogo').style.display = 'none';
             document.getElementById('tela-nome').style.display = 'block';
             document.getElementById('input-nome').value = '';
@@ -321,6 +489,7 @@
 
         function mostrarTelaJogo(nome) {
             document.getElementById('tela-nome').style.display = 'none';
+            document.getElementById('tela-confirmar').style.display = 'none';
             document.getElementById('tela-jogo').style.display = 'block';
             document.getElementById('nome-exibido').textContent = nome;
         }
@@ -406,12 +575,19 @@
 
         async function enviarPontuacao(nome, pontos) {
             const resultado = document.getElementById('resultado');
+            const jogadorId = localStorage.getItem(CHAVE_ID);
+            const foto = localStorage.getItem(CHAVE_FOTO);
+
             try {
-                await fetch('/api/ranking', {
+                const resposta = await fetch('/api/ranking', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome, pontos })
+                    body: JSON.stringify({ jogador_id: jogadorId, nome, pontos, foto })
                 });
+                const dados = await resposta.json();
+                if (dados.jogador_id) {
+                    localStorage.setItem(CHAVE_ID, dados.jogador_id);
+                }
                 resultado.innerHTML = `Você fez <strong>${pontos}</strong> pontos nesta rodada! Pontuação somada ao seu total. 🎉`;
             } catch (e) {
                 resultado.innerHTML = `Você fez <strong>${pontos}</strong> pontos, mas não consegui enviar ao ranking agora. Verifique sua conexão.`;
@@ -430,24 +606,38 @@
                 if (!lista.length) {
                     const tr = document.createElement('tr');
                     const td = document.createElement('td');
-                    td.colSpan = 3;
+                    td.colSpan = 4;
                     td.textContent = 'Ninguém jogou ainda. Seja o primeiro!';
                     tr.appendChild(td);
                     corpo.appendChild(tr);
                     return;
                 }
 
-                const nomeJogador = (localStorage.getItem(CHAVE_NOME) || '').toLowerCase();
+                const idJogador = localStorage.getItem(CHAVE_ID);
                 const medalhas = ['🥇', '🥈', '🥉'];
 
                 lista.forEach((item, indice) => {
                     const tr = document.createElement('tr');
-                    if (item.nome.toLowerCase() === nomeJogador) {
+                    if (idJogador && item.jogador_id === idJogador) {
                         tr.className = 'voce';
                     }
 
                     const tdPos = document.createElement('td');
                     tdPos.textContent = medalhas[indice] || String(indice + 1);
+
+                    const tdFoto = document.createElement('td');
+                    if (item.foto) {
+                        const img = document.createElement('img');
+                        img.src = item.foto;
+                        img.alt = item.nome;
+                        img.className = 'avatar-ranking';
+                        tdFoto.appendChild(img);
+                    } else {
+                        const span = document.createElement('span');
+                        span.className = 'avatar-ranking placeholder';
+                        span.textContent = '🎮';
+                        tdFoto.appendChild(span);
+                    }
 
                     const tdNome = document.createElement('td');
                     tdNome.textContent = item.nome;
@@ -455,14 +645,14 @@
                     const tdPontos = document.createElement('td');
                     tdPontos.textContent = item.pontos;
 
-                    tr.append(tdPos, tdNome, tdPontos);
+                    tr.append(tdPos, tdFoto, tdNome, tdPontos);
                     corpo.appendChild(tr);
                 });
             } catch (e) {
                 corpo.innerHTML = '';
                 const tr = document.createElement('tr');
                 const td = document.createElement('td');
-                td.colSpan = 3;
+                td.colSpan = 4;
                 td.textContent = 'Não foi possível carregar o ranking.';
                 tr.appendChild(td);
                 corpo.appendChild(tr);
