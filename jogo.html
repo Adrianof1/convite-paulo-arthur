@@ -324,6 +324,10 @@
 
         <div id="tela-jogo" style="display:none;">
             <p class="jogador-info">Jogando como <strong id="nome-exibido"></strong> — <a onclick="trocarNome()">trocar</a></p>
+            <p class="jogador-info">
+                <a id="link-foto" onclick="document.getElementById('input-foto-jogo').click()">📷 Adicionar foto do ranking</a>
+            </p>
+            <input type="file" id="input-foto-jogo" accept="image/*" style="display:none;">
 
             <div class="hud">
                 <span>⏱️ <span id="tempo">30</span>s</span>
@@ -394,8 +398,52 @@
                 }
             });
 
+            const inputFotoJogo = document.getElementById('input-foto-jogo');
+            inputFotoJogo.addEventListener('change', async () => {
+                const arquivo = inputFotoJogo.files[0];
+                if (!arquivo) return;
+                try {
+                    const foto = await processarFoto(arquivo);
+                    await enviarFoto(foto);
+                } catch (e) {
+                    alert('Não consegui processar essa foto. Tente outra.');
+                }
+            });
+
             carregarRanking();
         });
+
+        function atualizarLinkFoto() {
+            const link = document.getElementById('link-foto');
+            const temFoto = !!localStorage.getItem(CHAVE_FOTO);
+            link.textContent = temFoto ? '📷 Trocar foto do ranking' : '📷 Adicionar foto do ranking';
+        }
+
+        async function enviarFoto(foto) {
+            const jogadorId = localStorage.getItem(CHAVE_ID);
+            const nome = localStorage.getItem(CHAVE_NOME);
+            const link = document.getElementById('link-foto');
+            const textoOriginal = link.textContent;
+            link.textContent = 'Enviando foto...';
+
+            try {
+                const resposta = await fetch('/api/ranking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ jogador_id: jogadorId, nome, pontos: 0, foto })
+                });
+                const dados = await resposta.json();
+                if (dados.jogador_id) {
+                    localStorage.setItem(CHAVE_ID, dados.jogador_id);
+                }
+                localStorage.setItem(CHAVE_FOTO, foto);
+                atualizarLinkFoto();
+                carregarRanking();
+            } catch (e) {
+                link.textContent = textoOriginal;
+                alert('Não consegui enviar a foto agora. Verifique sua conexão.');
+            }
+        }
 
         function processarFoto(arquivo) {
             return new Promise((resolve, reject) => {
@@ -492,6 +540,7 @@
             document.getElementById('tela-confirmar').style.display = 'none';
             document.getElementById('tela-jogo').style.display = 'block';
             document.getElementById('nome-exibido').textContent = nome;
+            atualizarLinkFoto();
         }
 
         function iniciarRodada() {

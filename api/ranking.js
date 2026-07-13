@@ -55,7 +55,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ erro: 'Nome inválido.' });
     }
 
-    if (!Number.isInteger(pontosNum) || pontosNum < 1 || pontosNum > PONTOS_MAX_POR_ENVIO) {
+    if (!Number.isInteger(pontosNum) || pontosNum < 0 || pontosNum > PONTOS_MAX_POR_ENVIO) {
       return res.status(400).json({ erro: 'Pontuação inválida.' });
     }
 
