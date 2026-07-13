@@ -107,6 +107,50 @@
             box-shadow: inset 0 0 0 4px #ffffff, inset 0 0 0 6px #222224;
         }
 
+        /* Tela "Convite Capturado" (efeito Pokémon Brilhante) */
+        #captura-sucesso {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pokeball.brilhante {
+            position: relative;
+            animation: brilhoShiny 0.9s ease-in-out infinite alternate;
+        }
+
+        @keyframes brilhoShiny {
+            from { box-shadow: 0 0 20px 6px rgba(255,203,5,0.6), 0 10px 20px rgba(0,0,0,0.3); }
+            to   { box-shadow: 0 0 50px 18px rgba(255,203,5,0.9), 0 10px 20px rgba(0,0,0,0.3); }
+        }
+
+        .estrela-shiny {
+            position: absolute;
+            font-size: 22px;
+            pointer-events: none;
+            animation: cintilar 1.1s ease-in-out infinite;
+        }
+
+        .estrela-shiny.e1 { top: -22px; left: -18px; animation-delay: 0s; }
+        .estrela-shiny.e2 { top: -22px; right: -18px; animation-delay: 0.25s; }
+        .estrela-shiny.e3 { bottom: -12px; left: -26px; animation-delay: 0.5s; }
+        .estrela-shiny.e4 { bottom: -12px; right: -26px; animation-delay: 0.75s; }
+
+        @keyframes cintilar {
+            0%, 100% { opacity: 0.2; transform: scale(0.7) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.3) rotate(25deg); }
+        }
+
+        .texto-capturado {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            color: #2a75bb;
+            text-shadow: 2px 2px #ffcb05;
+            margin-top: 30px;
+            text-align: center;
+            animation: pulse 1s infinite;
+        }
+
         /* Cartão do Convite */
         #convite-card {
             display: none;
@@ -445,6 +489,18 @@
         </div>
     </div>
 
+    <!-- Tela "Convite Capturado" (efeito Pokémon Brilhante) -->
+    <div id="captura-sucesso">
+        <div class="pokeball brilhante">
+            <div class="pokeball-button"></div>
+            <span class="estrela-shiny e1">✨</span>
+            <span class="estrela-shiny e2">✨</span>
+            <span class="estrela-shiny e3">✨</span>
+            <span class="estrela-shiny e4">✨</span>
+        </div>
+        <p class="texto-capturado">✨ Convite Capturado! ✨</p>
+    </div>
+
     <!-- Convite Aberto -->
     <div id="convite-card">
         <h1>Eu escolho VOCÊ!</h1>
@@ -535,39 +591,47 @@
                 setTimeout(() => {
                     pokeballContainer.style.display = 'none';
 
-                    // Toca a música do Pokémon
-                    const musica = document.getElementById('musica-pokemon');
-                    if(musica) {
-                        musica.volume = 0.5;
-                        musica.play().catch(e => console.log("Navegador bloqueou o áudio."));
-                    }
-
-                    // Só agora carrega e toca o vídeo (evita baixar o arquivo antes do convite abrir)
-                    const video = document.getElementById('video-convite');
-                    if(video) {
-                        const fonte = video.querySelector('source');
-                        if (fonte && !fonte.src) {
-                            fonte.src = fonte.dataset.src;
-                            video.load();
-                        }
-                        video.muted = false;
-                        video.play().catch(() => {
-                            video.muted = true;
-                            video.play().catch(e => console.log("Navegador bloqueou o vídeo."));
-                        });
-                    }
-
-                    // Exibe o cartão do convite
-                    const convite = document.getElementById('convite-card');
-                    convite.style.display = 'block';
-
-                    iniciarTypewriter();
-                    criarConfete();
-                    iniciarContagem();
+                    // Fase 3: "Convite Capturado!" (efeito Pokémon Brilhante)
+                    const capturaSucesso = document.getElementById('captura-sucesso');
+                    capturaSucesso.style.display = 'flex';
 
                     setTimeout(() => {
                         flash.classList.remove('active');
                     }, 400);
+
+                    setTimeout(() => {
+                        capturaSucesso.style.display = 'none';
+
+                        // Toca a música do Pokémon
+                        const musica = document.getElementById('musica-pokemon');
+                        if(musica) {
+                            musica.volume = 0.5;
+                            musica.play().catch(e => console.log("Navegador bloqueou o áudio."));
+                        }
+
+                        // Só agora carrega e toca o vídeo (evita baixar o arquivo antes do convite abrir)
+                        const video = document.getElementById('video-convite');
+                        if(video) {
+                            const fonte = video.querySelector('source');
+                            if (fonte && !fonte.src) {
+                                fonte.src = fonte.dataset.src;
+                                video.load();
+                            }
+                            video.muted = false;
+                            video.play().catch(() => {
+                                video.muted = true;
+                                video.play().catch(e => console.log("Navegador bloqueou o vídeo."));
+                            });
+                        }
+
+                        // Exibe o cartão do convite
+                        const convite = document.getElementById('convite-card');
+                        convite.style.display = 'block';
+
+                        iniciarTypewriter();
+                        criarConfete();
+                        iniciarContagem();
+                    }, 2000);
                 }, 350);
             }, 1400);
         }
