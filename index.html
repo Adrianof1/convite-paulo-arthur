@@ -67,6 +67,17 @@
             font-weight: bold;
         }
 
+        .mao-apontando {
+            display: inline-block;
+            margin-right: 4px;
+            animation: apontar 0.9s ease-in-out infinite;
+        }
+
+        @keyframes apontar {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(6px); }
+        }
+
         .local-festa a:hover {
             text-decoration: underline;
         }
@@ -511,9 +522,11 @@
 
         <!-- Local da festa -->
         <div class="local-festa">
+            ⏰ Ás 19:30hrs
+            <br>
             📍 Rua 08, Número 3412<br>Loteamento Planalto Uruguai
             <br>
-            <a href="https://maps.app.goo.gl/AWunZEgA37DMd8vV8" target="_blank" onclick="event.stopPropagation()">👉 Acesse aqui para a localização da festa</a>
+            <a href="https://maps.app.goo.gl/AWunZEgA37DMd8vV8" target="_blank" onclick="event.stopPropagation()"><span class="mao-apontando">👉</span> Acesse aqui para a localização da festa</a>
         </div>
 
         <!-- Lembrete do jogo/competição -->
